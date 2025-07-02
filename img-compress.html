@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Free responsive image compressor tool. Compress images to specific quality or size (KB/MB). SEO-optimized and AdSense ready." />
+  <meta name="keywords" content="image compressor, image optimization, compress JPG PNG WEBP, SEO image tool" />
+  <meta name="author" content="Your Name" />
+  <title>Smart Image Compressor</title>
+  <style>
+    :root {
+      --primary: #007bff;
+      --primary-dark: #0056b3;
+      --secondary: #28a745;
+      --secondary-dark: #218838;
+      --bg-light: #f4f8fb;
+      --card-bg: #fff;
+      --text: #333;
+      --border: #ccc;
+      --highlight: #eaf6ff;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg-light);
+      margin: 0;
+      padding: 20px;
+      color: var(--text);
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 123, 255, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: var(--primary-dark);
+    }
+    .upload-area {
+      border: 2px dashed var(--primary);
+      border-radius: 10px;
+      background: #fff;
+      text-align: center;
+      padding: 30px;
+      margin-bottom: 20px;
+      transition: background 0.3s ease;
+      cursor: pointer;
+    }
+    .upload-area:hover {
+      background: var(--highlight);
+    }
+    .upload-area input {
+      display: none;
+    }
+    .preview-images {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .preview-images img {
+      max-width: 150px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    .options {
+      margin: 20px 0;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input[type="range"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 1em;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 30px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: var(--primary-dark);
+    }
+    a#downloadLink {
+      display: inline-block;
+      background: var(--secondary);
+      padding: 12px 25px;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+      margin-top: 20px;
+      transition: background 0.3s ease;
+    }
+    a#downloadLink:hover {
+      background: var(--secondary-dark);
+    }
+    .hidden {
+      display: none;
+    }
+    .ad-container {
+      text-align: center;
+      margin: 20px auto;
+    }
+  </style>
+</head>
+<body>
+  <!-- Google AdSense Ad Slot Top -->
+  <div class="ad-container">
+    <ins class="adsbygoogle"
+      style="display:block"
+      data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+      data-ad-slot="1234567890"
+      data-ad-format="auto"
+      data-full-width-responsive="true"></ins>
+  </div>
+
+  <div class="container">
+    <h1>Smart Image Compressor</h1>
+
+    <div class="upload-area" id="dropZone">
+      <p>Click or drag & drop image here to compress</p>
+      <input type="file" id="uploadImage" accept="image/*" />
+    </div>
+
+    <div class="preview-images hidden" id="previewBox">
+      <div>
+        <p id="originalSize"></p>
+        <img id="originalPreview" />
+      </div>
+      <div>
+        <p id="compressedSize"></p>
+        <img id="compressedPreview" />
+      </div>
+    </div>
+
+    <div class="options">
+      <label for="compressionType">Compression Type:</label>
+      <select id="compressionType">
+        <option value="quality">By Quality</option>
+        <option value="size">By Size (KB/MB)</option>
+      </select>
+
+      <div id="qualityOption">
+        <label for="qualityRange">Quality: <span id="qualityValue">80</span>%</label>
+        <input type="range" id="qualityRange" min="10" max="100" value="80" />
+      </div>
+
+      <div id="sizeOption" class="hidden">
+        <label for="targetSize">Target Size:</label>
+        <input type="number" id="targetSize" placeholder="Enter size" />
+        <select id="sizeUnit">
+          <option value="kb">KB</option>
+          <option value="mb">MB</option>
+        </select>
+      </div>
+
+      <button onclick="compressImage()">Compress Image</button>
+    </div>
+
+    <div id="downloadBox" class="hidden">
+      <a id="downloadLink" href="#" download>Download Compressed</a>
+    </div>
+  </div>
+
+  <!-- Google AdSense Ad Slot Bottom -->
+  <div class="ad-container">
+    <ins class="adsbygoogle"
+      style="display:block"
+      data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+      data-ad-slot="0987654321"
+      data-ad-format="auto"
+      data-full-width-responsive="true"></ins>
+  </div>
+
+  <script>
+    const uploadImage = document.getElementById("uploadImage");
+    const dropZone = document.getElementById("dropZone");
+    const previewBox = document.getElementById("previewBox");
+    const originalPreview = document.getElementById("originalPreview");
+    const compressedPreview = document.getElementById("compressedPreview");
+    const originalSize = document.getElementById("originalSize");
+    const compressedSize = document.getElementById("compressedSize");
+    const qualityRange = document.getElementById("qualityRange");
+    const qualityValue = document.getElementById("qualityValue");
+    const compressionType = document.getElementById("compressionType");
+    const qualityOption = document.getElementById("qualityOption");
+    const sizeOption = document.getElementById("sizeOption");
+    const targetSize = document.getElementById("targetSize");
+    const sizeUnit = document.getElementById("sizeUnit");
+    const downloadBox = document.getElementById("downloadBox");
+    const downloadLink = document.getElementById("downloadLink");
+
+    let originalFile;
+    let originalImage = new Image();
+
+    function updateFile(file) {
+      if (!file) return;
+      originalFile = file;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        originalImage.onload = function () {
+          originalPreview.src = e.target.result;
+          originalSize.textContent = `Original: ${(file.size / 1024).toFixed(2)} KB`;
+          previewBox.classList.remove("hidden");
+        };
+        originalImage.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    uploadImage.addEventListener("change", (e) => updateFile(e.target.files[0]));
+    dropZone.addEventListener("click", () => uploadImage.click());
+    dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.style.background = "#eee"; });
+    dropZone.addEventListener("dragleave", () => { dropZone.style.background = "#fff"; });
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.style.background = "#fff";
+      updateFile(e.dataTransfer.files[0]);
+    });
+
+    qualityRange.addEventListener("input", () => {
+      qualityValue.textContent = qualityRange.value;
+    });
+
+    compressionType.addEventListener("change", () => {
+      const type = compressionType.value;
+      qualityOption.classList.toggle("hidden", type !== "quality");
+      sizeOption.classList.toggle("hidden", type !== "size");
+    });
+
+    function compressImage() {
+      if (!originalFile) return;
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = originalImage.width;
+      canvas.height = originalImage.height;
+      ctx.drawImage(originalImage, 0, 0);
+
+      const type = originalFile.type.includes("png") ? "image/png" : "image/jpeg";
+
+      function toBlobPromise(canvas, type, quality) {
+        return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), type, quality));
+      }
+
+      const compressLoop = async () => {
+        let blob;
+
+        if (compressionType.value === "quality") {
+          const quality = parseInt(qualityRange.value) / 100;
+          blob = await toBlobPromise(canvas, type, quality);
+        } else {
+          let targetBytes = parseInt(targetSize.value);
+          targetBytes *= sizeUnit.value === "mb" ? 1024 * 1024 : 1024;
+          let min = 0.05, max = 1.0, best = null;
+
+          for (let i = 0; i < 20; i++) {
+            const mid = (min + max) / 2;
+            const testBlob = await toBlobPromise(canvas, type, mid);
+            if (!testBlob) break;
+            if (testBlob.size > targetBytes) {
+              max = mid;
+            } else {
+              best = testBlob;
+              min = mid;
+            }
+            if (Math.abs(testBlob.size - targetBytes) < 1024) break;
+          }
+          blob = best;
+        }
+
+        const compressedURL = URL.createObjectURL(blob);
+        const filename = `compressed.${type.split("/")[1]}`;
+        compressedPreview.src = compressedURL;
+        compressedSize.textContent = `Compressed: ${(blob.size / 1024).toFixed(2)} KB`;
+        downloadLink.href = compressedURL;
+        downloadLink.download = filename;
+        downloadBox.classList.remove("hidden");
+        downloadLink.click();
+      };
+
+      compressLoop();
+    }
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</body>
+</html>
